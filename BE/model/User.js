@@ -27,6 +27,10 @@ const User = sequelize.define('users',{
     email:{
         type: Sequelize.STRING,
         allowNull: false
+    },
+    profilePict:{
+        type: Sequelize.STRING,
+        allowNull: true
     }
 },{
     timestamps: false
