@@ -3,7 +3,7 @@ const sequelize = require("../util/db");
 
 const Token = sequelize.define('tokens',{
     id:{
-        type: Sequelize.INTEGER(),
+        type: Sequelize.INTEGER,
         primaryKey: true,
         allowNull: false,
         autoIncrement: true
