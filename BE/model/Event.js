@@ -24,6 +24,10 @@ const Event = sequelize.define("events",{
         type: Sequelize.STRING,
         allowNull: false,
     },
+    seatAvailable:{
+        type: Sequelize.INTEGER,
+        allowNull: true
+    },
     imageUrl:{
         type: Sequelize.STRING,
         allowNull: true,
