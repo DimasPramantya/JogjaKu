@@ -9,7 +9,7 @@ Jogjaku is web based travel application. In this app you can see list of travel 
 
 ## Table of Contents
 
-- [Jogjaku](#pembelajaran-itc)
+- [Jogjaku](#jogjaku)
   - [Table of Contents](#table-of-contents)
   - [User](#user)
     - [Register User](#register-user)
