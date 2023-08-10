@@ -15,6 +15,7 @@ Jogjaku is web based travel application. In this app you can see list of travel 
     - [Register User](#register-user)
     - [Login User](#login-user)
   - [Admin](#admin)
+    - [Login Admin](#login-admin)
     - [Create Event](#create-event)
 
 ---
@@ -75,3 +76,42 @@ Response
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiZGltYXMiLCJpYXQiOjE2ODk4ODM3ODAsImV4cCI6MTY4OTg4NzM4MH0.nUAGXbuC3cM3illnVrr0C6YIa8httmOggVQ5YuogRZs"
 }
 ```
+
+---
+
+## Admin
+
+### Login Admin
+
+Endpoint
+
+```text
+POST /admin/login
+```
+
+Body
+
+```json
+{
+    "username": "AdMinSeCret",
+    "password": "SeCretAdMin1*"
+}
+```
+
+Response
+
+```json
+{
+    "message": "Login Success",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbklkIjoxLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2ODk5NTI1NzAsImV4cCI6MTY4OTk1NjE3MH0.bCWHyJzJZrj4wQwAiGe26aIIIAgKu4ET00V6Bh5miPk"
+}
+```
+
+### Create Event
+
+Endpoint
+
+```text
+POST /admin/post-event
+```
+

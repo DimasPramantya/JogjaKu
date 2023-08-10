@@ -1,0 +1,6 @@
+runtime: nodejs18
+env_variables:
+  DB_USER: "jogja"
+  DB_NAME: “jogjaku"
+  DB_PASS: "jogja85"
+  DB_INSTANCE: "quickstart-instance"
