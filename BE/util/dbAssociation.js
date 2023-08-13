@@ -5,6 +5,7 @@ const Token = require("../model/Token");
 const User = require("../model/User");
 const Order = require("../model/Order");
 const UserTicket = require("../model/UserTicket");
+const Transaction = require("../model/Transaction");
 const sequelize = require("./db");
 
 //one to one relation between user and token
@@ -19,6 +20,14 @@ EventTicket.belongsTo(Event);
 User.hasMany(Order)
 Order.belongsTo(User)
 
+// one to many between product to order
+EventTicket.hasMany(Order)
+Order.belongsTo(EventTicket)
+
+// one to many between transaction to order
+Transaction.hasMany(Order)
+Order.belongsTo(Transaction)
+
 // one to many between user to userticket
 User.hasMany(UserTicket);
 UserTicket.belongsTo(User);
@@ -29,7 +38,7 @@ UserTicket.belongsTo(EventTicket);
 
 const association = async ()=>{
     try {
-        await sequelize.sync({force:true});
+        await sequelize.sync({});
         // await Admin.create({
         //     username: "$2a$12$KEVYY8QnYDcoh9w5PGOGm.88DeQXkAa5kLsQuH4ljkU/UPoHDKcHe",
         //     password: "$2a$12$huZpTV93LJTCprmxDsqN3eHuXRNhrDtdHj9mmnqJtMz/ITyP05a82"
@@ -39,4 +48,4 @@ const association = async ()=>{
     }
 }
 
-module.exports = association;
+module.exports = association; 

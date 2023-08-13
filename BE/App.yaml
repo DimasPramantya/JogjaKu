@@ -1,6 +1,7 @@
 runtime: nodejs18
 env_variables:
-  DB_USER: "jogja"
-  DB_NAME: “jogjaku"
+  DB_USER: "jogja85"
+  DB_NAME: "jogjaku"
   DB_PASS: "jogja85"
-  DB_INSTANCE: "quickstart-instance"
+  DB_INSTANCE: "jogjaku-komang-85856:asia-southeast2:quickstart-instance"
+  INSTANCE_UNIX_SOCKET: "/cloudsql/jogjaku-komang-85856:asia-southeast2:quickstart-instance"
