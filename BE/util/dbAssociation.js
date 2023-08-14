@@ -25,6 +25,10 @@ Order.belongsTo(User)
 User.hasMany(Cart)
 Cart.belongsTo(User)
 
+// one to many between event ticket to cart
+EventTicket.hasMany(Cart)
+Cart.belongsTo(EventTicket);
+
 // one to many between product to order
 EventTicket.hasMany(Order)
 Order.belongsTo(EventTicket)
@@ -44,10 +48,13 @@ UserTicket.belongsTo(EventTicket);
 const association = async ()=>{
     try {
         await sequelize.sync({});
-        // await Admin.create({
-        //     username: "$2a$12$KEVYY8QnYDcoh9w5PGOGm.88DeQXkAa5kLsQuH4ljkU/UPoHDKcHe",
-        //     password: "$2a$12$huZpTV93LJTCprmxDsqN3eHuXRNhrDtdHj9mmnqJtMz/ITyP05a82"
-        // })
+        const admin = await Admin.findOne({where: {id: 1}});
+        if(admin===null){
+            await Admin.create({
+                username: "$2a$12$KEVYY8QnYDcoh9w5PGOGm.88DeQXkAa5kLsQuH4ljkU/UPoHDKcHe",
+                password: "$2a$12$huZpTV93LJTCprmxDsqN3eHuXRNhrDtdHj9mmnqJtMz/ITyP05a82"
+            })  
+        }
     } catch (error) {
         console.log(error.message);
     }
