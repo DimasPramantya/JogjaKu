@@ -10,7 +10,11 @@ const Order = sequelize.define('orders',{
     quantity:{
         type: Sequelize.INTEGER,
         allowNull: false
-    },
+    },    
+    status:{
+        type: Sequelize.ENUM(["settlement", "deny", "cancel", "pending"]),
+        allowNull: false
+    }
 })
 
 module.exports = Order;

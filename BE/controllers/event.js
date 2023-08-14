@@ -43,6 +43,35 @@ const postEventHandler = async(req,res,next)=>{
     }
 }
 
+const postTicketHandler = async(req,res,next)=>{
+    try {
+        //take the data
+        const {eventId} = req.params;
+        const {touristType, ageType, price} = req.body;
+
+     
+        
+        //search the event
+        const currentEvent = await Event.findOne({where: {id: eventId}});
+
+        if(!currentEvent){
+            throw new Error("Event is not found");
+        }
+
+        //create the event ticket
+        const ticket = await currentEvent.createEventTicket({touristType, ageType, price});
+
+        res.status(200).json({
+            status: "Success!!",
+            message: "Create tickets successfull!!",
+            data: ticket
+        })
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
-    postEventHandler
+    postEventHandler, postTicketHandler
 }

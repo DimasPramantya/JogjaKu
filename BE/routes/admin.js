@@ -1,5 +1,5 @@
 const express = require('express');
-const { postEventHandler } = require('../controllers/event');
+const { postEventHandler, postTicketHandler } = require('../controllers/event');
 const adminAuthorization = require('../middleware/adminAuthorization');
 const adminLoginHandler = require('../controllers/adminAuthentication');
 
@@ -10,5 +10,7 @@ router.post('/login', adminLoginHandler);
 router.use(adminAuthorization);
 
 router.post('/post-event', postEventHandler);
+
+router.post('/post-tickets/:eventId', postTicketHandler);
 
 module.exports = router;

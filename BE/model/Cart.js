@@ -1,20 +1,20 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../util/db');
 
-const Transaction = sequelize.define('transactions',{
+const Cart = sequelize.define('carts',{
     id:{
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         primaryKey: true,
         allowNull: false
     },
-    price:{
+    quantity:{
         type: Sequelize.INTEGER,
         allowNull: false
-    },
-    midtransResponse:{
-        type: Sequelize.STRING,
+    },    
+    totalPrice:{
+        type: Sequelize.INTEGER,
         allowNull: false
     }
 })
 
-module.exports = Transaction;
+module.exports = Cart;

@@ -6,6 +6,7 @@ const User = require("../model/User");
 const Order = require("../model/Order");
 const UserTicket = require("../model/UserTicket");
 const Transaction = require("../model/Transaction");
+const Cart = require("../model/Cart");
 const sequelize = require("./db");
 
 //one to one relation between user and token
@@ -19,6 +20,10 @@ EventTicket.belongsTo(Event);
 // one to many between user to order
 User.hasMany(Order)
 Order.belongsTo(User)
+
+// one to many between user to cart
+User.hasMany(Cart)
+Cart.belongsTo(User)
 
 // one to many between product to order
 EventTicket.hasMany(Order)
