@@ -11,6 +11,6 @@ router.use(adminAuthorization);
 
 router.post('/post-event', postEventHandler);
 
-router.post('/post-tickets/:eventId', postTicketHandler);
+router.post('/post-ticket/:eventId', postTicketHandler);
 
 module.exports = router;

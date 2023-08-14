@@ -49,8 +49,6 @@ const postTicketHandler = async(req,res,next)=>{
         const {eventId} = req.params;
         const {touristType, ageType, price} = req.body;
 
-     
-        
         //search the event
         const currentEvent = await Event.findOne({where: {id: eventId}});
 
