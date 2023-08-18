@@ -3,9 +3,10 @@ const sequelize = require('../util/db');
 
 const Order = sequelize.define('orders',{
     id:{
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
+        autoIncrement: true
     },
     quantity:{
         type: Sequelize.INTEGER,

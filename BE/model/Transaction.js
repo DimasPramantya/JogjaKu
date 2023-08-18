@@ -12,8 +12,8 @@ const Transaction = sequelize.define('transactions',{
         allowNull: false
     },
     midtransResponse:{
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.TEXT,
+        allowNull: true
     }
 })
 

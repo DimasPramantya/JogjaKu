@@ -12,6 +12,9 @@ const Cart = require("../model/Cart");
 require('dotenv').config();
 const secretKey = process.env.SECRET_KEY;
 
+const { v4: uuidv4 } = require('uuid');
+
+
 //configuring midtrans coreApi for payment api 
 let coreApi = new midtransClient.CoreApi({
     isProduction: false,
@@ -112,22 +115,72 @@ const getUserCart = async(req,res,next)=>{
 
 const postOrder = async(req,res,next)=>{
     try {
+        const token = getToken(req.headers);
+        const decoded = jwt.verify(token, secretKey);
+        
+        const userCart = await Cart.findAll({where: {userId: decoded.userId}})
+        let totalPrice = userCart.reduce((sum, object) => sum + object.totalPrice, 0);
 
-        const {eventTicket, totalPrice} = req.body;
-        for(let ticket of eventTicket){
+        const uuid = uuidv4();
+
+        const {bank_name} = req.body;
+        const paymentParameter = {
+            payment_type: "bank_transfer",
+            transaction_details:{
+                gross_amount: totalPrice,
+                order_id: uuid
+            },
+            bank_transfer:{
+                bank: bank_name
+            }
+        };
+
+        const midtransResponse = await coreApi.charge(JSON.stringify(paymentParameter));
+
+        let currentTransaction = await Transaction.create({id: uuid, price: totalPrice, midtransResponse: JSON.stringify(midtransResponse)});
+
+        for(let cart of userCart){
             await Order.create({
-                quantity: ticket.quantity,
-                eventTicketId: ticket.id, 
-                status: "pending" 
-            });
+                quantity: cart.quantity, 
+                status: "pending", 
+                userId: decoded.userId, 
+                eventTicketId: cart.eventTicketId,
+                transactionId: currentTransaction.id
+            })
+            await cart.destroy();
         }
 
+        res.json({
+            status: "success"
+        })
 
     } catch (error) {
         next(error)
     }
 }
 
+const hookPaymentStatus = async(req,res,next)=>{
+    try {
+        const midtransUpdateResponse = await coreApi.transaction.notification(req.body);
+        let orderId = midtransUpdateResponse.order_id;
+        let transactionStatus = midtransUpdateResponse.transaction_status;
+        console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}.`);
+        
+        const currentTransaction = await Transaction.findOne({where: {id: orderId}});
+        currentTransaction.midtransResponse = JSON.stringify(midtransUpdateResponse);
+        await currentTransaction.save();
+
+        const currentOrders = await Order.findAll({where: {transactionId: orderId}});
+        for(let order of currentOrders){
+            order.status = transactionStatus;
+            await order.save();
+        }
+        console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}.`);
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
-    postCart,deleteCartItem,getUserCart
+    postCart, deleteCartItem, getUserCart, postOrder, hookPaymentStatus
 }
