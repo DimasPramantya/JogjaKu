@@ -19,7 +19,11 @@ const EventTicket = sequelize.define("eventTickets",{
     price:{
         type: Sequelize.INTEGER,
         allowNull: false,
-    },
+    },    
+    dateTime:{
+        type: Sequelize.STRING,
+        allowNull: false
+    }
 },{
     timestamps: false
 })

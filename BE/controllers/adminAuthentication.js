@@ -14,18 +14,19 @@ const adminLoginHandler = async(req,res,next)=>{
         //take the admin data from database
         const admin = await Admin.findAll();
 
-        console.log(admin[0].username, username);
-
-        //validate email & password
-        if(!bcrypt.compareSync(username, admin[0].username) || !bcrypt.compareSync(password, admin[0].password)){
+        // Validate username and password
+        const usernameMatch = bcrypt.compareSync(username, admin[0].username);
+        const passwordMatch = bcrypt.compareSync(password, admin[0].password);
+        
+        if (!usernameMatch || !passwordMatch) {
             throw new Error("Wrong Email or Password");
         }
 
         //generate the token
         const token = jwt.sign({adminId: admin[0].id, role: "admin"}, secretKey, {
             algorithm: "HS256",
-            //expires in 1 hour
-            expiresIn: '1h'
+            //expires in 3 days
+            expiresIn: '3d'
         })
 
         res.json({
