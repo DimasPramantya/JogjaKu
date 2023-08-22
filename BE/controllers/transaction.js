@@ -22,8 +22,8 @@ const { v4: uuidv4 } = require('uuid');
 //configuring midtrans coreApi for payment api 
 let coreApi = new midtransClient.CoreApi({
     isProduction: false,
-    serverKey: "SB-Mid-server-7gGRQaklp-y4gcBVa4KsguRt",
-    clientKey: "SB-Mid-client-5MZY6y3aMv7KUcab"
+    serverKey: process.env.SERVER_MIDTRANS_KEY,
+    clientKey: process.env.CLIENT_MIDTRANS_KET
 })
 
 const getToken = (headers) => {
