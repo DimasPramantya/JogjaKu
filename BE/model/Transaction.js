@@ -11,9 +11,9 @@ const Transaction = sequelize.define('transactions',{
         type: Sequelize.INTEGER,
         allowNull: false
     },
-    midtransResponse:{
-        type: Sequelize.TEXT,
-        allowNull: true
+    status:{
+        type: Sequelize.ENUM(["settlement", "deny", "cancel", "pending"]),
+        allowNull: false
     }
 })
 

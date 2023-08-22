@@ -20,7 +20,7 @@ const { v4: uuidv4 } = require('uuid');
 
 
 //configuring midtrans coreApi for payment api 
-let coreApi = new midtransClient.CoreApi({
+let coreApi = new midtransClient.Snap({
     isProduction: false,
     serverKey: process.env.SERVER_MIDTRANS_KEY,
     clientKey: process.env.CLIENT_MIDTRANS_KET
@@ -247,21 +247,19 @@ const postOrder = async (req, res, next) => {
 
         const uuid = uuidv4();
 
-        const { bank_name } = req.body;
         const paymentParameter = {
-            payment_type: "bank_transfer",
             transaction_details: {
                 gross_amount: totalPrice,
                 order_id: uuid
             },
-            bank_transfer: {
-                bank: bank_name
+            credit_card:{
+                secure: false
             }
         };
 
-        const midtransResponse = await coreApi.charge(JSON.stringify(paymentParameter));
+        const midtransTransactionToken = await coreApi.createTransactionToken(JSON.stringify(paymentParameter));
 
-        let currentTransaction = await Transaction.create({ id: uuid, price: totalPrice, midtransResponse: JSON.stringify(midtransResponse) });
+        let currentTransaction = await Transaction.create({ id: uuid, price: totalPrice, status: "pending" });
 
         for (let cart of userCart) {
             await Order.create({
@@ -277,7 +275,7 @@ const postOrder = async (req, res, next) => {
         res.json({
             status: "success",
             message: "post order success!!!",
-
+            token: midtransTransactionToken
         })
 
     } catch (error) {
@@ -288,20 +286,15 @@ const postOrder = async (req, res, next) => {
 const hookPaymentStatus = async (req, res, next) => {
     try {
         const midtransUpdateResponse = await coreApi.transaction.notification(req.body);
-        let orderId = midtransUpdateResponse.order_id;
+        let transactionId = midtransUpdateResponse.order_id;
         let transactionStatus = midtransUpdateResponse.transaction_status;
-        console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}.`);
+        if(transactionStatus === "settelement"){
 
-        const currentTransaction = await Transaction.findOne({ where: { id: orderId } });
-        currentTransaction.midtransResponse = JSON.stringify(midtransUpdateResponse);
-        await currentTransaction.save();
-
-        const currentOrders = await Order.findAll({ where: { transactionId: orderId } });
-        for (let order of currentOrders) {
-            order.status = transactionStatus;
-            await order.save();
         }
-        console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}.`);
+
+        const currentTransaction = await Transaction.findOne({ where: { id: transactionId } });
+        currentTransaction.status = transactionStatus;
+        await currentTransaction.save();
     } catch (error) {
         next(error);
     }

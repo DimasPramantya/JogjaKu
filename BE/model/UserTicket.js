@@ -7,6 +7,14 @@ const UserTicket = sequelize.define('usertickets',{
         primaryKey: true,
         allowNull: false
     },
+    date:{
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    status:{
+        type: Sequelize.ENUM(["valid", "expired"]),
+        allowNull: false
+    }
 })
 
 module.exports = UserTicket;
