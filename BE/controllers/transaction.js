@@ -288,13 +288,13 @@ const hookPaymentStatus = async (req, res, next) => {
         const midtransUpdateResponse = await coreApi.transaction.notification(req.body);
         let transactionId = midtransUpdateResponse.order_id;
         let transactionStatus = midtransUpdateResponse.transaction_status;
-        if(transactionStatus === "settelement"){
-
-        }
 
         const currentTransaction = await Transaction.findOne({ where: { id: transactionId } });
         currentTransaction.status = transactionStatus;
         await currentTransaction.save();
+        if(transactionStatus === "settelement"){
+            
+        }
     } catch (error) {
         next(error);
     }

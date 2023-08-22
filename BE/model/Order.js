@@ -11,6 +11,10 @@ const Order = sequelize.define('orders',{
     quantity:{
         type: Sequelize.INTEGER,
         allowNull: false
+    },
+    date:{
+        type: Sequelize.STRING,
+        allowNull: false
     }
 })
 
