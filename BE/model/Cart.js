@@ -15,6 +15,10 @@ const Cart = sequelize.define('carts',{
     totalPrice:{
         type: Sequelize.INTEGER,
         allowNull: false
+    },
+    date:{
+        type: Sequelize.STRING,
+        allowNull: false
     }
 })
 

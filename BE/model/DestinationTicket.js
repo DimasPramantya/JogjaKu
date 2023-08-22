@@ -1,43 +1,31 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../util/db');
 
-const Event = sequelize.define("events",{
+const DestinationTicket = sequelize.define("destinationTickets",{
     id:{
         type: Sequelize.INTEGER,
         primaryKey: true,
         allowNull: false,
         autoIncrement: true
     },
-    name:{
+    touristType:{
         type: Sequelize.STRING,
         allowNull: false,
     },
-    description:{
-        type: Sequelize.TEXT,
-        allowNull: true
-    },
-    organizer:{
+    ageType:{
         type: Sequelize.STRING,
         allowNull: false,
     },
-    date:{
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    location:{
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    seatAvailable:{
+    price:{
         type: Sequelize.INTEGER,
-        allowNull: true
+        allowNull: false,
     },
-    imageUrl:{
-        type: Sequelize.TEXT,
-        allowNull: true,
+    dateTime:{
+        type: Sequelize.STRING,
+        allowNull: false
     }
 },{
     timestamps: false
 })
 
-module.exports = Event;
+module.exports = DestinationTicket;

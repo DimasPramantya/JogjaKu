@@ -1,7 +1,9 @@
 const express = require('express');
-const { postEventHandler, postTicketHandler } = require('../controllers/event');
+const { postEventHandler, postEventTicketHandler, postImageLogic } = require('../controllers/event');
 const adminAuthorization = require('../middleware/adminAuthorization');
 const adminLoginHandler = require('../controllers/adminAuthentication');
+const multer = require('../middleware/uploadFile');
+const { postDestination, postDestinationTicket } = require('../controllers/destination');
 
 const router = express.Router();
 
@@ -9,8 +11,14 @@ router.post('/login', adminLoginHandler);
 
 router.use(adminAuthorization);
 
-router.post('/post-event', postEventHandler);
+router.post('/post-event', multer.array('images', 3), postEventHandler);
 
-router.post('/post-ticket/:eventId', postTicketHandler);
+router.post('/post-event-ticket/:eventId', postEventTicketHandler);
+
+router.post('/post-destination', multer.array('images', 3), postDestination);
+
+router.post('/post-destination-ticket/:destinationId', postDestinationTicket)
+
+router.post('/post-file',postImageLogic)
 
 module.exports = router;

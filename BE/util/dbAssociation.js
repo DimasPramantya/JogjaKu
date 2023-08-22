@@ -1,21 +1,22 @@
 const Admin = require("../model/Admin");
 const Event = require("../model/Event");
 const EventTicket = require("../model/EventTicket");
-const Token = require("../model/Token");
 const User = require("../model/User");
 const Order = require("../model/Order");
 const UserTicket = require("../model/UserTicket");
 const Transaction = require("../model/Transaction");
 const Cart = require("../model/Cart");
+const Destination = require("../model/Destination");
+const DestinationTicket = require("../model/DestinationTicket");
 const sequelize = require("./db");
-
-//one to one relation between user and token
-User.hasOne(Token);
-Token.belongsTo(User);
 
 //one to many between event to event ticket
 Event.hasMany(EventTicket);
 EventTicket.belongsTo(Event);
+
+//one to many between destination to destination ticket
+Destination.hasMany(DestinationTicket);
+DestinationTicket.belongsTo(Destination);
 
 // one to many between user to order
 User.hasMany(Order)
@@ -29,9 +30,17 @@ Cart.belongsTo(User)
 EventTicket.hasMany(Cart)
 Cart.belongsTo(EventTicket);
 
-// one to many between product to order
+// one to many between event ticket to order
 EventTicket.hasMany(Order)
 Order.belongsTo(EventTicket)
+
+// one to many between destination ticket to cart
+DestinationTicket.hasMany(Cart)
+Cart.belongsTo(DestinationTicket);
+
+// one to many between destination ticket to order
+DestinationTicket.hasMany(Order)
+Order.belongsTo(DestinationTicket)
 
 // one to many between transaction to order
 Transaction.hasMany(Order)
@@ -44,6 +53,10 @@ UserTicket.belongsTo(User);
 // one to many between event ticket to user ticket
 EventTicket.hasMany(UserTicket);
 UserTicket.belongsTo(EventTicket);
+
+// one to many between destination ticket to user ticket
+DestinationTicket.hasMany(UserTicket);
+UserTicket.belongsTo(DestinationTicket);
 
 const association = async ()=>{
     try {

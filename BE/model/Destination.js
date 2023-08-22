@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../util/db');
 
-const Event = sequelize.define("events",{
+const Destination = sequelize.define("destinations",{
     id:{
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -14,23 +14,11 @@ const Event = sequelize.define("events",{
     },
     description:{
         type: Sequelize.TEXT,
-        allowNull: true
-    },
-    organizer:{
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    date:{
-        type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     location:{
         type: Sequelize.STRING,
         allowNull: false,
-    },
-    seatAvailable:{
-        type: Sequelize.INTEGER,
-        allowNull: true
     },
     imageUrl:{
         type: Sequelize.TEXT,
@@ -40,4 +28,4 @@ const Event = sequelize.define("events",{
     timestamps: false
 })
 
-module.exports = Event;
+module.exports = Destination;
