@@ -1,3 +1,4 @@
+require('dotenv').config();
 const Admin = require("../model/Admin");
 const Event = require("../model/Event");
 const EventTicket = require("../model/EventTicket");
@@ -60,12 +61,12 @@ UserTicket.belongsTo(DestinationTicket);
 
 const association = async ()=>{
     try {
-        await sequelize.sync({force:true});
+        await sequelize.sync({});
         const admin = await Admin.findOne({where: {id: 1}});
         if(admin===null){
             await Admin.create({
-                username: "$2a$12$KEVYY8QnYDcoh9w5PGOGm.88DeQXkAa5kLsQuH4ljkU/UPoHDKcHe",
-                password: "$2a$12$huZpTV93LJTCprmxDsqN3eHuXRNhrDtdHj9mmnqJtMz/ITyP05a82"
+                username: process.env.ADMIN_USERNAME,
+                password: process.env.ADMIN_PASSWORD
             })  
         }
     } catch (error) {

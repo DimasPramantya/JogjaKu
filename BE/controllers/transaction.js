@@ -17,10 +17,11 @@ require('dotenv').config();
 const secretKey = process.env.SECRET_KEY;
 
 const { v4: uuidv4 } = require('uuid');
+const UserTicket = require('../model/UserTicket');
 
 
-//configuring midtrans coreApi for payment api 
-let coreApi = new midtransClient.Snap({
+//configuring midtrans snap for payment api 
+let snap = new midtransClient.Snap({
     isProduction: false,
     serverKey: process.env.SERVER_MIDTRANS_KEY,
     clientKey: process.env.CLIENT_MIDTRANS_KET
@@ -55,17 +56,17 @@ const postCart = async (req, res, next) => {
             const totalPrice = currentEventTicket.price * quantity;
 
             let currentCartTicket = await Cart.findOne({
-                where:{
+                where: {
                     eventTicketId: currentEventTicket.id,
                     userId: loggedUser.id
                 }
             })
 
-            if(currentCartTicket===undefined){
-                currentCartTicket = await loggedUser.createCart({ quantity, totalPrice, eventTicketId:ticketId });
+            if (currentCartTicket === undefined) {
+                currentCartTicket = await loggedUser.createCart({ quantity, totalPrice, eventTicketId: ticketId });
             }
-            else{
-                currentCartTicket.quantity+=quantity;
+            else {
+                currentCartTicket.quantity += quantity;
                 currentCartTicket.totalPrice += totalPrice;
                 await currentCartTicket.save();
             }
@@ -83,27 +84,27 @@ const postCart = async (req, res, next) => {
                     totalPrice
                 }
             })
-        }else{
-            const {date} = req.body;
+        } else {
+            const { date } = req.body;
             const currentDestinationTicket = await DestinationTicket.findOne({ where: { id: ticketId } });
 
             const currentDestination = await Destination.findOne({ where: { id: currentDestinationTicket.destinationId } })
 
             const totalPrice = currentDestinationTicket.price * quantity;
-           
+
             let currentCartTicket = await Cart.findOne({
-                where:{
+                where: {
                     destinationTicketId: currentDestinationTicket.id,
                     userId: loggedUser.id,
                     date
                 }
             })
 
-            if(currentCartTicket === null){
-                currentCartTicket = await loggedUser.createCart({ quantity, totalPrice, destinationTicketId:ticketId, date });
+            if (currentCartTicket === null) {
+                currentCartTicket = await loggedUser.createCart({ quantity, totalPrice, destinationTicketId: ticketId, date });
             }
-            else{
-                currentCartTicket.quantity+=quantity;
+            else {
+                currentCartTicket.quantity += quantity;
                 currentCartTicket.totalPrice += totalPrice;
                 await currentCartTicket.save();
             }
@@ -167,7 +168,7 @@ const getUserCart = async (req, res, next) => {
                     attributes: ['id', 'touristType', 'ageType', 'dateTime'], // Include specific attributes of EventTicket
                     include: {
                         model: Event,
-                        attributes: ['id','name', 'date']
+                        attributes: ['id', 'name', 'date']
                     }
                 },
             ]
@@ -184,10 +185,10 @@ const getUserCart = async (req, res, next) => {
             include: [
                 {
                     model: DestinationTicket,
-                    attributes: ['id','touristType', 'ageType', 'dateTime'], // Include specific attributes of EventTicket
+                    attributes: ['id', 'touristType', 'ageType', 'dateTime'], // Include specific attributes of EventTicket
                     include: {
                         model: Destination,
-                        attributes: ['id','name']
+                        attributes: ['id', 'name']
                     }
                 },
             ]
@@ -207,9 +208,9 @@ const getUserCart = async (req, res, next) => {
     }
 }
 
-const getUserCartByDestinationTicketID = async(req,res,next)=>{
+const getUserCartByDestinationTicketID = async (req, res, next) => {
     try {
-        const {destinationTicketId} = req.params;
+        const { destinationTicketId } = req.params;
         console.log(destinationTicketId);
         const token = getToken(req.headers);
         const decoded = jwt.verify(token, secretKey);
@@ -252,30 +253,32 @@ const postOrder = async (req, res, next) => {
                 gross_amount: totalPrice,
                 order_id: uuid
             },
-            credit_card:{
+            credit_card: {
                 secure: false
             }
         };
 
-        const midtransTransactionToken = await coreApi.createTransactionToken(JSON.stringify(paymentParameter));
+        const midtransTransactionToken = await snap.createTransactionToken(JSON.stringify(paymentParameter));
 
-        let currentTransaction = await Transaction.create({ id: uuid, price: totalPrice, status: "pending" });
+        let currentTransaction = await Transaction.create({ id: uuid, price: totalPrice, status: "pending", snapToken: midtransTransactionToken });
 
         for (let cart of userCart) {
             await Order.create({
                 quantity: cart.quantity,
                 status: "pending",
+                date: cart.date,
                 userId: decoded.userId,
                 eventTicketId: cart.eventTicketId,
+                destinationTicketId: cart.destinationTicketId,
                 transactionId: currentTransaction.id
             })
             await cart.destroy();
-        }
+        };
 
         res.json({
             status: "success",
             message: "post order success!!!",
-            token: midtransTransactionToken
+            token: midtransTransactionToken,
         })
 
     } catch (error) {
@@ -285,16 +288,37 @@ const postOrder = async (req, res, next) => {
 
 const hookPaymentStatus = async (req, res, next) => {
     try {
-        const midtransUpdateResponse = await coreApi.transaction.notification(req.body);
+        const midtransUpdateResponse = await snap.transaction.notification(req.body);
         let transactionId = midtransUpdateResponse.order_id;
         let transactionStatus = midtransUpdateResponse.transaction_status;
 
-        const currentTransaction = await Transaction.findOne({ where: { id: transactionId } });
+        const currentTransaction = await Transaction.findOne(
+            {
+                where: { id: transactionId },
+                include: [
+                    {
+                        model: Order
+                    }
+                ]
+            }
+        );
+        if (transactionStatus === "settlement" && currentTransaction.status !== transactionStatus) {
+            for (let order of currentTransaction.orders) {
+                for (let i = 0; i < order.quantity; i++) {
+                    let uuid = uuidv4();
+                    await UserTicket.create({
+                        id: uuid,
+                        userId: order.userId,
+                        date: order.date,
+                        eventTicketId: order.eventTicketId,
+                        destinationTicketId: order.destinationTicketId,
+                        status: "valid"
+                    })
+                }
+            }
+        }
         currentTransaction.status = transactionStatus;
         await currentTransaction.save();
-        if(transactionStatus === "settelement"){
-            
-        }
     } catch (error) {
         next(error);
     }
