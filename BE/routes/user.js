@@ -2,7 +2,8 @@ const express = require('express');
 const { signUpHandler, loginHandler, getUserData } = require('../controllers/userAccount');
 const { 
     postCart, deleteCartItem, getUserCart, postOrder, hookPaymentStatus, 
-    getUserCartByDestinationTicketID 
+    getUserCartByDestinationTicketID, 
+    getUserOrderHistory
     } = require('../controllers/transaction');
 const multer = require('../middleware/uploadFile');
 const { getDestinations, getDestinationById } = require('../controllers/destination');
@@ -30,5 +31,7 @@ router.get('/cart/:destinationTicketId', getUserCartByDestinationTicketID)
 router.post('/order', postOrder);
 
 router.post('/update-payment-status', hookPaymentStatus);
+
+router.get('/order-history/',getUserOrderHistory)
 
 module.exports = router;

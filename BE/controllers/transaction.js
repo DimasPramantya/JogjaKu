@@ -161,7 +161,6 @@ const getUserCart = async (req, res, next) => {
                     [Op.not]: null
                 }
             },
-            attributes: { exclude: ['id'] },
             include: [
                 {
                     model: EventTicket,
@@ -181,7 +180,6 @@ const getUserCart = async (req, res, next) => {
                     [Op.not]: null
                 }
             },
-            attributes: { exclude: ['id'] },
             include: [
                 {
                     model: DestinationTicket,
@@ -246,7 +244,8 @@ const postOrder = async (req, res, next) => {
         const userCart = await Cart.findAll({ where: { userId: decoded.userId } })
         let totalPrice = userCart.reduce((sum, object) => sum + object.totalPrice, 0);
 
-        const uuid = uuidv4();
+        let uuid = uuidv4();
+        uuid = uuid.slice(0,8);
 
         const paymentParameter = {
             transaction_details: {
@@ -260,14 +259,13 @@ const postOrder = async (req, res, next) => {
 
         const midtransTransactionToken = await snap.createTransactionToken(JSON.stringify(paymentParameter));
 
-        let currentTransaction = await Transaction.create({ id: uuid, price: totalPrice, status: "pending", snapToken: midtransTransactionToken });
+        let currentTransaction = await Transaction.create({ id: uuid, price: totalPrice, status: "pending", snapToken: midtransTransactionToken, userId: decoded.userId });
 
         for (let cart of userCart) {
             await Order.create({
                 quantity: cart.quantity,
                 status: "pending",
                 date: cart.date,
-                userId: decoded.userId,
                 eventTicketId: cart.eventTicketId,
                 destinationTicketId: cart.destinationTicketId,
                 transactionId: currentTransaction.id
@@ -306,9 +304,10 @@ const hookPaymentStatus = async (req, res, next) => {
             for (let order of currentTransaction.orders) {
                 for (let i = 0; i < order.quantity; i++) {
                     let uuid = uuidv4();
+                    uuid = uuid.slice(0,8);
                     await UserTicket.create({
                         id: uuid,
-                        userId: order.userId,
+                        userId: currentTransaction.userId,
                         date: order.date,
                         eventTicketId: order.eventTicketId,
                         destinationTicketId: order.destinationTicketId,
@@ -324,7 +323,121 @@ const hookPaymentStatus = async (req, res, next) => {
     }
 }
 
+const expiredTicketHandler = async(req,res,next)=>{
+    try {
+        const {userTicketId} = req.params;
+        
+        const currentTicket = await UserTicket.findOne({where:{id:userTicketId}});
+        currentTicket.status = "expired";
+        await currentTicket.save();
+
+        res.json({
+            status: "success",
+            message: "ticket is used",
+            currentTicket
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+const getUserOrderHistory = async(req,res,next)=>{
+    try {
+        const token = getToken(req.headers);
+        const decoded = jwt.verify(token, secretKey);
+
+        const activeTicket = await UserTicket.findAll({
+            where: {
+                status:"valid",
+                userId: decoded.userId
+            },
+            include:[
+                {
+                    model: EventTicket,
+                    include: {
+                        model: Event,
+                        attributes: ['id', 'name', 'date']
+                    }
+                },
+                {
+                    model: DestinationTicket,
+                    include:{
+                        model: Destination,
+                        attributes: ['id', 'name']
+                    }
+                }
+
+            ]
+        });
+
+        const historyPayment = await Transaction.findAll({
+            where: {
+                status: {[Op.not]: 'pending'},
+                userId: decoded.userId   
+            },
+            include: {
+                model: Order,
+                include:[
+                    {
+                        model: EventTicket,
+                        include: {
+                            model: Event,
+                            attributes: ['id', 'name', 'date']
+                        }
+                    },
+                    {
+                        model: DestinationTicket,
+                        include:{
+                            model: Destination,
+                            attributes: ['id', 'name']
+                        }
+                    }
+
+                ]
+            }
+        })
+
+        const pendingPayment = await Transaction.findAll({
+            where: {
+                status: 'pending',
+                userId: decoded.userId   
+            },
+            include: {
+                model: Order,
+                include:[
+                    {
+                        model: EventTicket,
+                        include: {
+                            model: Event,
+                            attributes: ['id', 'name', 'date']
+                        }
+                    },
+                    {
+                        model: DestinationTicket,
+                        include:{
+                            model: Destination,
+                            attributes: ['id', 'name']
+                        }
+                    }
+
+                ]
+            }
+        });
+
+        res.json({
+            status: "Success",
+            message: "Fetch User's Order Success",
+            pendingPayment,
+            historyPayment,
+            activeTicket
+        })
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     postCart, deleteCartItem, getUserCart, postOrder, hookPaymentStatus,
-    getUserCartByDestinationTicketID
+    getUserCartByDestinationTicketID, expiredTicketHandler, getUserOrderHistory
 }
