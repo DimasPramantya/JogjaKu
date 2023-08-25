@@ -8,21 +8,25 @@ const EventTicket = sequelize.define("eventTickets",{
         allowNull: false,
         autoIncrement: true
     },
-    touristType:{
+    seatType:{
         type: Sequelize.STRING,
-        allowNull: false,
-    },
-    ageType:{
-        type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     price:{
         type: Sequelize.INTEGER,
         allowNull: false,
+    },
+    date:{
+        type: Sequelize.STRING,
+        allowNull: false
     },    
     dateTime:{
         type: Sequelize.STRING,
         allowNull: false
+    },
+    seatAvailable:{
+        type: Sequelize.INTEGER,
+        allowNull: false,
     }
 },{
     timestamps: false

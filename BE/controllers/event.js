@@ -15,11 +15,11 @@ const cloudinary = require('../util/cloudinary');
 
 const postEventHandler = async (req, res, next) => {
     try {
-        const { name, description, location, organizer, date, seatAvailable } = req.body;
+        const { name, description, location, organizer, date } = req.body;
         if (!req.files || req.files.length === 0) {
             throw new Error('No files uploaded');
         }
-        const currentEvent = await Event.create({ name, description, location, organizer, date, seatAvailable });
+        const currentEvent = await Event.create({ name, description, location, organizer, date});
         const uploadResultUrls = [];
         let i = 0;
         const uploadPromises = req.files.map((file) => {
@@ -61,7 +61,7 @@ const postEventTicketHandler = async (req, res, next) => {
     try {
         //take the data
         const { eventId } = req.params;
-        const { touristType, ageType, price } = req.body;
+        const { seatType, price, date, dateTime, seatAvailable } = req.body;
 
         //search the event
         const currentEvent = await Event.findOne({ where: { id: eventId } });
@@ -71,7 +71,7 @@ const postEventTicketHandler = async (req, res, next) => {
         }
 
         //create the event ticket
-        const ticket = await currentEvent.createEventTicket({ touristType, ageType, price });
+        const ticket = await currentEvent.createEventTicket({ seatType, price, date, dateTime, seatAvailable });
 
         res.status(200).json({
             status: "Success!!",
@@ -87,15 +87,6 @@ const postEventTicketHandler = async (req, res, next) => {
 const postImageLogic = async (req, res, next) => {
     try {
         if (req.file) {
-            //--USING CLOUD STORAGE BUCKET--
-            // const blob = bucket.file(req.file.originalname);
-            // const blobStream = blob.createWriteStream();
-            // blobStream.on("finish",()=>{
-            //     res.status(200).send("upload file success");
-            // });
-            // blobStream.end(req.file.buffer);
-
-            //--USING CLOUDINARY--
             console.log("req.file exist", req.file);
             const file = req.file;
             const uploadOptions = {
@@ -122,6 +113,49 @@ const postImageLogic = async (req, res, next) => {
     }
 }
 
+const getEvents = async(req,res,next)=>{
+    try {
+        const events = await Event.findAll({
+            include: [
+                {
+                  model: EventTicket,
+                },
+              ],
+        })
+        res.json({
+            status: "Success",
+            message: "Successfully Fetch Event Data",
+            events
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+const getEventById = async(req,res,next)=>{
+    try {
+        const {eventId} = req.params;
+        const event = await Event.findOne({
+            where:{
+                id: eventId
+            },
+            include: [
+                {
+                  model: EventTicket,
+                },
+              ],
+        })
+        res.json({
+            status: "Success",
+            message: "Successfully Fetch Event Data",
+            event
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
-    postEventHandler, postEventTicketHandler, postImageLogic
+    postEventHandler, postEventTicketHandler, postImageLogic,
+    getEvents, getEventById
 }
