@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUpHandler, loginHandler, getUserData } = require('../controllers/userAccount');
+const { signUpHandler, loginHandler, getUserData, editUserAccount } = require('../controllers/userAccount');
 const { 
     postCart, deleteCartItem, getUserCart, postOrder, hookPaymentStatus, 
     getUserCartByDestinationTicketID, 
@@ -7,12 +7,17 @@ const {
     } = require('../controllers/transaction');
 const multer = require('../middleware/uploadFile');
 const { getDestinations, getDestinationById } = require('../controllers/destination');
+const { getEvents, getEventById } = require('../controllers/event');
 
 const router = express.Router();
 
 router.get('/destinations', getDestinations);
 
 router.get('/destination/:destinationId', getDestinationById);
+
+router.get('/events', getEvents);
+
+router.get('/event/:eventId', getEventById);
 
 router.get('/user', getUserData);
 
@@ -32,6 +37,8 @@ router.post('/order', postOrder);
 
 router.post('/update-payment-status', hookPaymentStatus);
 
-router.get('/order-history/',getUserOrderHistory)
+router.get('/order-history/',getUserOrderHistory);
+
+router.put('/edit-profile', editUserAccount)
 
 module.exports = router;

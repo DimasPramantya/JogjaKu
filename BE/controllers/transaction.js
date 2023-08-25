@@ -62,8 +62,8 @@ const postCart = async (req, res, next) => {
                 }
             })
 
-            if (currentCartTicket === undefined) {
-                currentCartTicket = await loggedUser.createCart({ quantity, totalPrice, eventTicketId: ticketId });
+            if (currentCartTicket === null) {
+                currentCartTicket = await loggedUser.createCart({ quantity, totalPrice, eventTicketId: ticketId, date: currentEventTicket.date });
             }
             else {
                 currentCartTicket.quantity += quantity;
@@ -76,7 +76,7 @@ const postCart = async (req, res, next) => {
                 message: "Add To Cart Success!!",
                 data: {
                     ticket: currentEvent.name,
-                    date: currentEvent.date,
+                    date: currentEventTicket.date,
                     touristType: currentEventTicket.touristType,
                     age: currentEventTicket.ageType,
                     dateTime: currentEventTicket.dateTime,
@@ -129,6 +129,8 @@ const postCart = async (req, res, next) => {
     }
 }
 
+
+
 const deleteCartItem = async (req, res, next) => {
     try {
         const token = getToken(req.headers);
@@ -164,7 +166,6 @@ const getUserCart = async (req, res, next) => {
             include: [
                 {
                     model: EventTicket,
-                    attributes: ['id', 'touristType', 'ageType', 'dateTime'], // Include specific attributes of EventTicket
                     include: {
                         model: Event,
                         attributes: ['id', 'name', 'date']
@@ -183,7 +184,6 @@ const getUserCart = async (req, res, next) => {
             include: [
                 {
                     model: DestinationTicket,
-                    attributes: ['id', 'touristType', 'ageType', 'dateTime'], // Include specific attributes of EventTicket
                     include: {
                         model: Destination,
                         attributes: ['id', 'name']
@@ -302,6 +302,11 @@ const hookPaymentStatus = async (req, res, next) => {
         );
         if (transactionStatus === "settlement" && currentTransaction.status !== transactionStatus) {
             for (let order of currentTransaction.orders) {
+                if(order.eventTicketId!==null){
+                    const currentEventTicket = await EventTicket.findOne({where:{id:order.eventTicketId}});
+                    currentEventTicket.seatAvailable -= order.quantity;
+                    await currentEventTicket.save();
+                }
                 for (let i = 0; i < order.quantity; i++) {
                     let uuid = uuidv4();
                     uuid = uuid.slice(0,8);
@@ -318,6 +323,9 @@ const hookPaymentStatus = async (req, res, next) => {
         }
         currentTransaction.status = transactionStatus;
         await currentTransaction.save();
+        res.status(200).json({
+            status: "success"
+        })
     } catch (error) {
         next(error);
     }
