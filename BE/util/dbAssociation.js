@@ -60,7 +60,7 @@ UserTicket.belongsTo(DestinationTicket);
 
 const association = async ()=>{
     try {
-        await sequelize.sync({force:true});
+        await sequelize.sync({});
         const admin = await Admin.findOne({where: {id: 1}});
         if(admin===null){
             await Admin.create({
