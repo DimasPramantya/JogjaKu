@@ -1,5 +1,5 @@
 const express = require('express');
-const { signUpHandler, loginHandler, getUserData } = require('../controllers/userAccount');
+const { signUpHandler, loginHandler, getUserData, editUserAccount } = require('../controllers/userAccount');
 const { 
     postCart, deleteCartItem, getUserCart, postOrder, hookPaymentStatus, 
     getUserCartByDestinationTicketID, 
@@ -17,6 +17,8 @@ router.get('/destination/:destinationId', getDestinationById);
 router.get('/user', getUserData);
 
 router.post('/register', multer.single('image'), signUpHandler);
+
+router.put('/edit-profile', multer.single('image'), editUserAccount);
 
 router.post('/login', loginHandler);
 

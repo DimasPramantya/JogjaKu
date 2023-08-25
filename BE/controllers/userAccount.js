@@ -127,6 +127,44 @@ const getUserData = async(req,res,next)=>{
     }
 }
 
+const editUserAccount = async(req,res,next)=>{
+    try {
+        const token = getToken(req.headers);
+        const decoded = jwt.verify(token, secretKey);
+        const { fullName, username, password, email } = req.body;
+        const user = await User.findOne({where: {id: decoded.userId}})
+        if (!user) {
+            throw new Error(`User with ${decoded.userId} doesn't exist!!!`)
+        }
+        await user.update({
+            fullName, username, password, email
+        });
+        if (req.file) {
+            console.log("req.file exist", req.file);
+            const file = req.file;
+            const uploadOptions = {
+                folder: 'jogjaku_user_profile/', // Specify the folder in Cloudinary where you want to store the images
+                public_id: `profile_${user.username}_${decoded.userId}`, // Assign a unique public ID for the image
+                overwrite: true // Overwrite if the image with the same public ID already exists
+            };
+
+            const uploadResult = await cloudinary.uploader.upload_stream(uploadOptions, async (error, result) => {
+                if (error) {
+                    console.error("Error uploading file:", error);
+                    return res.status(500).json({ error: 'Upload failed' });
+                }
+                const profilePict = result.secure_url;
+                await user.update({
+                    profilePict
+                });
+            }).end(req.file.buffer);
+        }
+        res.status(200).json({ status: "success", message: "Successfully update user" });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
-    signUpHandler, loginHandler, getUserData
+    signUpHandler, loginHandler, getUserData, editUserAccount
 }
