@@ -19,10 +19,6 @@ EventTicket.belongsTo(Event);
 Destination.hasMany(DestinationTicket);
 DestinationTicket.belongsTo(Destination);
 
-// one to many between user to order
-User.hasMany(Order)
-Order.belongsTo(User)
-
 // one to many between user to cart
 User.hasMany(Cart)
 Cart.belongsTo(User)
@@ -58,6 +54,10 @@ UserTicket.belongsTo(EventTicket);
 // one to many between destination ticket to user ticket
 DestinationTicket.hasMany(UserTicket);
 UserTicket.belongsTo(DestinationTicket);
+
+// one to many between destination User to transaction
+User.hasMany(Transaction);
+Transaction.belongsTo(User);
 
 const association = async ()=>{
     try {
