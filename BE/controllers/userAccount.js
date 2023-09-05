@@ -38,7 +38,7 @@ const loginHandler = async (req, res, next) => {
         const token = jwt.sign({ userId: loggedUser.id, username: loggedUser.username }, secretKey, {
             algorithm: "HS256",
             //expires in 1 hour
-            expiresIn: '1h'
+            expiresIn: '1d'
         })
 
         //sending response data
@@ -98,7 +98,7 @@ const signUpHandler = async (req, res, next) => {
         const token = jwt.sign({ userId: newUser.id, username: newUser.username }, secretKey, {
             algorithm: "HS256",
             //expires in 3 day
-            expiresIn: '3d'
+            expiresIn: '1d'
         })
 
         //sending response data

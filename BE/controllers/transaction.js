@@ -289,6 +289,7 @@ const hookPaymentStatus = async (req, res, next) => {
         const midtransUpdateResponse = await snap.transaction.notification(req.body);
         let transactionId = midtransUpdateResponse.order_id;
         let transactionStatus = midtransUpdateResponse.transaction_status;
+        console.log(midtransUpdateResponse);
 
         const currentTransaction = await Transaction.findOne(
             {
@@ -321,7 +322,11 @@ const hookPaymentStatus = async (req, res, next) => {
                 }
             }
         }
-        currentTransaction.status = transactionStatus;
+        if(transactionStatus==='expire'){
+            currentTransaction.status = 'deny';
+        }else{
+            currentTransaction.status = transactionStatus;
+        }
         await currentTransaction.save();
         res.status(200).json({
             status: "success"
