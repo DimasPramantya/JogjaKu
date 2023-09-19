@@ -20,6 +20,10 @@ const Destination = sequelize.define("destinations",{
         type: Sequelize.STRING,
         allowNull: false,
     },
+    regency:{
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
     imageUrl:{
         type: Sequelize.TEXT,
         allowNull: true,

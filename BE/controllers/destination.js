@@ -5,11 +5,11 @@ const cloudinary = require('../util/cloudinary');
 
 const postDestination = async (req, res, next) => {
     try {
-        const { name, description, location } = req.body;
+        const { name, description, location, regency } = req.body;
         if (!req.files || req.files.length === 0) {
             throw new Error('No files uploaded');
         }
-        const currentDestination = await Destination.create({ name, description, location });
+        const currentDestination = await Destination.create({ name, description, location, regency });
         const uploadResultUrls = [];
         let i = 0;
         const uploadPromises = req.files.map((file) => {
