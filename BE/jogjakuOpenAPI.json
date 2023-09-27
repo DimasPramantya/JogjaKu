@@ -1,0 +1,55 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Jogjaku API",
+        "contact": {
+            "email": "igkdimas@gmail.com", 
+            "name": "Dimas Pramantya"
+        },
+        "version": "1.0"
+    },
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "servers": [{
+        "url": "https://jogjaku-komang-85856.et.r.appspot.com",
+        "description": "Jogjaku RESTful API Server"
+    }],
+    "paths": {
+        "/user/register":{
+            "post":{
+                "summary": "Register New User Account",
+                "description": "Registers a new user account with a unique email address that has not been previously registered.",
+                "requestBody":{
+                    
+                },
+                "responses": {
+
+                }
+            }
+        },
+        "/user/login":{
+            "post":{}
+        },
+        "/user":{
+            "get":{
+                "summary": "Get User Account Details",
+                "description": "Get user Account details",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "responses": {
+                    
+                }
+            }
+        }
+    }
+}

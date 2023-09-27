@@ -10,6 +10,7 @@ const Cart = require("../model/Cart");
 const Destination = require("../model/Destination");
 const DestinationTicket = require("../model/DestinationTicket");
 const sequelize = require("./db");
+const Activity = require('../model/Activity');
 
 //one to many between event to event ticket
 Event.hasMany(EventTicket);
@@ -58,6 +59,10 @@ UserTicket.belongsTo(DestinationTicket);
 // one to many between destination User to transaction
 User.hasMany(Transaction);
 Transaction.belongsTo(User);
+
+// one to many between destination to activity
+Destination.hasMany(Activity);
+Activity.belongsTo(Destination);
 
 const association = async ()=>{
     try {

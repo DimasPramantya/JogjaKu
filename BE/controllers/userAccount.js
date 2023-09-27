@@ -116,7 +116,7 @@ const getUserData = async(req,res,next)=>{
     try {
         const token = getToken(req.headers);
         const decoded = jwt.verify(token, secretKey);
-        const loggedUser = await User.findOne({ where: { id: decoded.userId }, attributes: { exclude: ['id','email'] } });
+        const loggedUser = await User.findOne({ where: { id: decoded.userId }, attributes: { exclude: ['id','email', 'password'] } });
         res.json({
             status: "success",
             message: "Successfully Fetch User Data",

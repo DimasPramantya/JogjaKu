@@ -1,15 +1,16 @@
 require('dotenv').config();
+const Activity = require('../model/Activity');
 const Destination = require('../model/Destination');
 const DestinationTicket = require("../model/DestinationTicket");
 const cloudinary = require('../util/cloudinary');
 
 const postDestination = async (req, res, next) => {
     try {
-        const { name, description, location, regency } = req.body;
+        const { name, description, location, regency, category } = req.body;
         if (!req.files || req.files.length === 0) {
             throw new Error('No files uploaded');
         }
-        const currentDestination = await Destination.create({ name, description, location, regency });
+        const currentDestination = await Destination.create({ name, description, location, regency, category });
         const uploadResultUrls = [];
         let i = 0;
         const uploadPromises = req.files.map((file) => {
@@ -47,6 +48,43 @@ const postDestination = async (req, res, next) => {
     }
 }
 
+const postActivity = async(req,res,next)=>{
+    try {
+        const { name, description, location, regency, tag } = req.body;
+        if (!req.files || req.files.length === 0) {
+            throw new Error('No files uploaded');
+        }
+        const currentActivity = await Activity.create({ name, description, location, regency, tag });
+        const uploadResultUrls = [];
+        let i = 0;
+        const uploadPromises = req.files.map((file) => {
+            i+=1;
+            return new Promise((resolve, reject) => {
+                const uploadOptions = {
+                    folder: 'jogjaku_activity_images/',
+                    public_id: `activity_${currentActivity.name}_${i}`,
+                    overwrite: true
+                };
+
+                const uploadStream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
+                    if (error) {
+                        console.error("Error uploading file:", error);
+                        reject(error);
+                    } else {
+                        uploadResultUrls.push(result.secure_url);
+                        resolve();
+                    }
+                }).end(file.buffer)
+            });
+        });
+        await Promise.all(uploadPromises);
+        currentActivity.imageUrl = uploadResultUrls.join(',');
+        await currentActivity.save();
+    } catch (error) {
+        next(error);
+    }
+}
+
 const postDestinationTicket = async(req,res,next)=>{
     try {
         //take the data
@@ -76,14 +114,7 @@ const postDestinationTicket = async(req,res,next)=>{
 
 const getDestinations = async(req,res,next)=>{
     try {
-        const destinations = await Destination.findAll({
-            include: [
-                {
-                  model: DestinationTicket,
-                  attributes: ['touristType', 'ageType', 'dateTime', 'price'], // Include specific attributes of DestinationTicket
-                },
-              ],
-        })
+        const destinations = await Destination.findAll()
         res.json({
             status: "Success",
             message: "Successfully Fetch Destination Data",
@@ -120,4 +151,5 @@ const getDestinationById = async(req,res,next)=>{
 
 module.exports = {
     postDestination, postDestinationTicket, getDestinations, getDestinationById
+    ,postActivity
 }
