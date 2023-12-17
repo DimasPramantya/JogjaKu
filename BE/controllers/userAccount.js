@@ -131,13 +131,13 @@ const editUserAccount = async(req,res,next)=>{
     try {
         const token = getToken(req.headers);
         const decoded = jwt.verify(token, secretKey);
-        const { fullName, username, password, email } = req.body;
+        const { fullName, username, phoneNumber, email } = req.body;
         const user = await User.findOne({where: {id: decoded.userId}})
         if (!user) {
             throw new Error(`User with ${decoded.userId} doesn't exist!!!`)
         }
         await user.update({
-            fullName, username, password, email
+            fullName, username, phoneNumber, email
         });
         if (req.file) {
             console.log("req.file exist", req.file);
@@ -165,6 +165,29 @@ const editUserAccount = async(req,res,next)=>{
     }
 }
 
+const changePassword = async(req,res,next)=>{
+    try {
+        const token = getToken(req.headers);
+        const decoded = jwt.verify(token, secretKey);
+        let {password} = req.body;
+        password = await bcrypt.hash(password, 10);
+        const user = await User.findOne({where: {id: decoded.userId}})
+        if (!user) {
+            throw new Error(`User with ${decoded.userId} doesn't exist!!!`)
+        }
+        await user.update({
+            password
+        });
+        res.json({
+            status: "success",
+            message: "Successfully Change Password",
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
-    signUpHandler, loginHandler, getUserData, editUserAccount
+    signUpHandler, loginHandler, getUserData, editUserAccount,
+    changePassword
 }

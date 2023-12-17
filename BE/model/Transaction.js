@@ -12,7 +12,7 @@ const Transaction = sequelize.define('transactions',{
         allowNull: false
     },
     status:{
-        type: Sequelize.ENUM(["settlement", "deny", "cancel", "pending"]),
+        type: Sequelize.ENUM(["settlement", "expired", "cancel", "pending", "deny"]),
         allowNull: false
     },
     snapToken:{

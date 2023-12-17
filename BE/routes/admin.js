@@ -1,9 +1,9 @@
 const express = require('express');
-const { postEventHandler, postEventTicketHandler, postImageLogic } = require('../controllers/event');
+const { postEventHandler, postEventTicketHandler, postImageLogic, updateEvent } = require('../controllers/event');
 const adminAuthorization = require('../middleware/adminAuthorization');
 const adminLoginHandler = require('../controllers/adminAuthentication');
 const multer = require('../middleware/uploadFile');
-const { postDestination, postDestinationTicket } = require('../controllers/destination');
+const { postDestination, postDestinationTicket, postActivity } = require('../controllers/destination');
 const { expiredTicketHandler } = require('../controllers/transaction');
 
 const router = express.Router();
@@ -23,5 +23,9 @@ router.post('/post-destination-ticket/:destinationId', postDestinationTicket);
 router.post('/post-file',postImageLogic);
 
 router.put('/ticket-status/:userTicketId', expiredTicketHandler);
+
+router.post('/activity', multer.array('images', 3), postActivity);
+
+router.put('/event/:eventId', updateEvent);
 
 module.exports = router;

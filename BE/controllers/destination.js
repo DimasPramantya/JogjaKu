@@ -51,10 +51,11 @@ const postDestination = async (req, res, next) => {
 const postActivity = async(req,res,next)=>{
     try {
         const { name, description, location, regency, tag } = req.body;
+        const {destinationId} = req.query;
         if (!req.files || req.files.length === 0) {
             throw new Error('No files uploaded');
         }
-        const currentActivity = await Activity.create({ name, description, location, regency, tag });
+        const currentActivity = await Activity.create({ name, description, location, regency, tag, destinationId });
         const uploadResultUrls = [];
         let i = 0;
         const uploadPromises = req.files.map((file) => {
@@ -80,6 +81,11 @@ const postActivity = async(req,res,next)=>{
         await Promise.all(uploadPromises);
         currentActivity.imageUrl = uploadResultUrls.join(',');
         await currentActivity.save();
+        res.json({ 
+            status: "Success",
+            message: "Create Activity Success!!!",
+            currentActivity
+        })
     } catch (error) {
         next(error);
     }
@@ -114,7 +120,11 @@ const postDestinationTicket = async(req,res,next)=>{
 
 const getDestinations = async(req,res,next)=>{
     try {
-        const destinations = await Destination.findAll()
+        const destinations = await Destination.findAll({
+            attributes:{
+                exclude: ['description', 'location']
+            }
+        })
         res.json({
             status: "Success",
             message: "Successfully Fetch Destination Data",
@@ -149,7 +159,42 @@ const getDestinationById = async(req,res,next)=>{
     }
 }
 
+const getActivities = async(req,res,next)=>{
+    try {
+        const activities = await Activity.findAll({
+            attributes:{
+                exclude: ['description', 'location']
+            }
+        })
+        res.json({
+            status: "Success",
+            message: "Successfully Fetch Activities Data",
+            activities
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
+const getActivityById = async(req,res,next)=>{
+    try {
+        const {activityId} = req.params;
+        const activity = await Activity.findOne({
+            where:{
+                id: activityId
+            }
+        })
+        res.json({
+            status: "Success",
+            message: "Successfully Fetch Activity Data",
+            activity
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     postDestination, postDestinationTicket, getDestinations, getDestinationById
-    ,postActivity
+    ,postActivity, getActivities, getActivityById
 }

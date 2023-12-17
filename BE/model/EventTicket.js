@@ -26,7 +26,7 @@ const EventTicket = sequelize.define("eventTickets",{
     },
     seatAvailable:{
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
     }
 },{
     timestamps: false

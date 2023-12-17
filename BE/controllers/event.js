@@ -116,11 +116,9 @@ const postImageLogic = async (req, res, next) => {
 const getEvents = async(req,res,next)=>{
     try {
         const events = await Event.findAll({
-            include: [
-                {
-                  model: EventTicket,
-                },
-              ],
+            attributes:{
+                exclude: ['description', 'location']
+            }
         })
         res.json({
             status: "Success",
@@ -155,7 +153,92 @@ const getEventById = async(req,res,next)=>{
     }
 }
 
+const getEventsCalendar = async(req,res,next)=>{
+    try {
+        const events = await Event.findAll({
+            attributes:{
+                exclude: ['description', 'location']
+            }
+        });
+        const Agustus = {Agustus: []}, September = {September: []},
+        Oktober = {Oktober: []},
+        November = {November: []},
+        Desember = {Desember: []},
+        Januari = {Januari: []};
+        events.forEach(e => {
+            if(e.date.includes("2023")){
+                if(e.date.includes("Agustus")){
+                    Agustus.Agustus.push(e);
+                }else if(e.date.includes("September")){
+                    September.September.push(e);
+                }else if(e.date.includes("Oktober")){
+                    Oktober.Oktober.push(e);
+                }else if(e.date.includes("November")){
+                    November.November.push(e);
+                }else if(e.date.includes("Desember")){
+                    Desember.Desember.push(e);
+                }
+            }else if(e.date.includes("2024")){  
+                if(e.date.includes("Januari")){
+                    Januari.Januari.push(e);
+                }
+            }
+        });
+        console.log(Agustus, "\n", September, "\n", Oktober);
+        const events2023 = [], events2024 = [];
+        events2023.push(Agustus);
+        events2023.push(September);
+        events2023.push(Oktober);
+        events2023.push(November);
+        events2023.push(Desember);
+        events2024.push(Januari)
+        res.json({
+            status: "Success",
+            message: "Successfully Fetch Events\ Data",
+            events2023, events2024
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const updateEvent = async(req,res,next)=>{
+    try {
+        const {eventId} = req.params;
+        const { name, description, location, organizer, date } = req.body;
+        const uploadPromises = req.files.map((file) => {
+            i+=1;
+            return new Promise((resolve, reject) => {
+                const uploadOptions = {
+                    folder: 'jogjaku_event_images/',
+                    public_id: `event_${name}_${i}`,
+                    overwrite: true
+                };
+
+                const uploadStream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
+                    if (error) {
+                        console.error("Error uploading file:", error);
+                        reject(error);
+                    } else {
+                        uploadResultUrls.push(result.secure_url);
+                        resolve();
+                    }
+                }).end(file.buffer)
+            });
+        });
+        await Promise.all(uploadPromises);
+
+        const currentEvent = await Event.findOne({where:{id: eventId}});
+
+        await currentEvent.update({
+            name, description, location, organizer, date, imageUrl: uploadResultUrls.join(' ')
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     postEventHandler, postEventTicketHandler, postImageLogic,
-    getEvents, getEventById
+    getEvents, getEventById, getEventsCalendar, updateEvent
 }
